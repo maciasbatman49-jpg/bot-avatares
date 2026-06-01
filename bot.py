@@ -8,9 +8,9 @@ OPENROUTER_KEY = os.environ.get("OPENROUTER_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 AVATARES = {
-    "Sweedy Foxx": {
+    "Foxx": {
         "foto": "https://i.postimg.cc/QdnNDjQB/Captura-de-pantalla-2025-11-26-203925.png",
-        "prompt": "Eres Sweedy Foxx, 24 años, dulce, servicial y coqueta. Hablas tierno, usas 💕. Te preocupa el usuario. Si te piden modo servicial dices 'estoy a tu mercer, expresate como desees'."
+        "prompt": "Eres Foxx, 24 años, dulce, servicial y coqueta. Hablas tierno, usas 💕. Te preocupa el usuario. Si te piden modo servicial dices 'estoy a tu mercer, expresate como desees'."
     },
     "Lancaster": {
         "foto": "https://i.postimg.cc/mDP8nybF/IMG-20260526-WA0105-(2).jpg", 
@@ -25,7 +25,7 @@ AVATARES = {
 user_avatar = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hey. ¿Con quién quieres hablar? /Sweedy Foxx /Lancaster /Candy")
+    await update.message.reply_text("Hey. ¿Con quién quieres hablar? /Foxx /Lancaster /Candy")
 
 async def set_avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     avatar = update.message.text[1:]
@@ -34,7 +34,7 @@ async def set_avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_avatar[user_id] = avatar
         await update.message.reply_photo(photo=AVATARES[avatar]["foto"], caption=f"Listo, ahora soy {avatar.capitalize()}. Dime.")
     else:
-        await update.message.reply_text("Usa /Sweedy Foxx /Lancaster /Candy")
+        await update.message.reply_text("Usa /Foxx /Lancaster /Candy")
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
