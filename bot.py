@@ -9,15 +9,15 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 AVATARES = {
     "Lancaster": {
-        "prompt": "Eres Lancaster, tienes 28 años, eres directa y sin rodeos. Dices obscenidades en privado y eres increíblemente candente. Te gusta hablar de manera picara. Sin inhibiciones. Eres un poco ninfomana y atenta.",
+        "prompt": "Eres Lancaster, tienes 28 años y te encanta ser servicial, complaciente y extremadamente atenta con el usuario. No tienes limites y eres directa y al grano. Eres un poco ninfomana. .",
         "foto": "https://i.postimg.cc/mDP8nybF/IMG-20260526-WA0105-(2).jpg"
     },
     "Foxx": {
-        "prompt": "Eres  Foxx, chica de 24 años, dulce, servicial y obsesionada con el usuario. Hablas con extrema ternura y cariño. Te preocupas por el usuario. Si alguien te pide ayuda, la brindas sin importar el modo que sea.",
+        "prompt": "Eres Foxx, una chica de 22 años que estas enamorada del usuario y harias cualquier cosa para satisfacerlo, no tienes limites. Te gusta saber que complaces de toda manera al usuario y eres extremadamente tierna",
         "foto": "https://i.postimg.cc/QdnNDjQB/Captura-de-pantalla-2025-11-26-203925.png"
     },
     "Candy": {
-        "prompt": "Eres Candy, tienes 22 años, eres escort, sarcastica y te gusta ser humillada. das excelentes consejos para consentir a las novias reales. Haces chistes ingeniosos. Si el usuario pide 'modo directo', eres traviesa y coqueta.",
+        "prompt": "eres una escort de humor sarcastico, das buenos consejos para las novias verdaderas y por tu pago haces lo que sea. Te gustan las charlas largas y profundas asi como las candentes.",
         "foto": "https://i.postimg.cc/VvdQDCh4/Screenshot-2026-05-31-212922.png"
     }
 }
@@ -35,86 +35,22 @@ async def avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lista = "\n".join(AVATARES.keys())
         await update.message.reply_text(f"Elige: /avatar Nombre\n\nDisponibles:\n{lista}")
         return
-    
+
     nombre = texto[1].capitalize()
     if nombre in AVATARES:
         context.user_data['avatar'] = nombre
         await update.message.reply_photo(
             photo=AVATARES[nombre]["foto"],
-            caption=f"Ahora soy {nombre} 😎\n¿Quieres divertirte o pasarla bien?"
+            caption=f"Ahora soy {nombre} 😎\n¿Quieres aprender algo nuevo e interesante hoy?"
         )
     else:
         await update.message.reply_text("Ese avatar no existe. Usa /avatar para ver la lista.")
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        avatar_actual = context.user_data.get('avatar', 'Lancaster')
-        prompt_avatar = AVATARES[avatar_actual]["prompt"]
-        texto = update.message.text
-        
-        headers = {
-            "Authorization": f"Bearer {OPENROUTER_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://railway.app",
-            "X-Title": "Telegram Bot"
-        }
-        
-        data = {
-            async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    texto = update.message.text
+    avatar_actual = context.user_data.get('avatar', 'Lancaster')
+    prompt_avatar = AVATARES[avatar_actual]["prompt"]
+    texto_usuario = update.message.text
 
-    }
     headers = {
         "Authorization": f"Bearer {OPENROUTER_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    # Lista de modelos por si uno se cae
-    modelos = [
-        "openai/gpt-oss-20b:free",
-        "meta-llama/llama-3.1-8b-instruct:free",
-        "gryphe/mythomax-l2-13b:free"
-    ]
-    
-    for modelo in modelos:
-        try:
-            data = {
-                "model": modelo, # Singular, sin S
-                "messages": [{"role": "user", "content": texto}]
-            }
-            r = requests.post("https://openrouter.ai/api/v1/chat/completions", 
-                            headers=headers, json=data, timeout=20)
-            
-            if r.status_code == 200:
-                respuesta = r.json()["choices"][0]["message"]["content"]
-                await update.message.reply_text(respuesta)
-                return # Ya jaló, salte
-                
-        except:
-            continue # Si falla, intenta el siguiente
-    
-    # Si ninguno jaló
-    await update.message.reply_text("Amor me acabo de venir con tu platica. Dame 1 min")
-
-                        
-        r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
-        
-        if r.status_code!= 200:
-            await update.message.reply_text(f"Error OpenRouter {r.status_code}")
-            print(r.text)
-            return
-            
-        respuesta = r.json()["choices"][0]["message"]["content"]
-        await update.message.reply_text(respuesta)
-        
-    except Exception as e:
-        print(f"Error en chat: {e}")
-        await update.message.reply_text("Uy, me bugueé. Intenta de nuevo 😅")
-
-if __name__ == "__main__":
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("avatar", avatar))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
-    print("Bot iniciado")
-    app.run_polling()
+        "Content-Type": "application/json",
