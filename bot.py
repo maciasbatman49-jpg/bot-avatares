@@ -114,7 +114,7 @@ async def responder_ia(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Me caí wey: {str(e)}")
 
 # Arranque del bot
-if name == "main":
+if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
     # Handlers de comandos
