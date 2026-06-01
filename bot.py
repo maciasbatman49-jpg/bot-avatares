@@ -16,10 +16,9 @@ logger = logging.getLogger(__name__)
  
 # ─── Cliente OpenRouter ────────────────────────────────────────────────────────
 client = OpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
+    api_key=os.environ.get("OPENROUTER_API_KEY", ""),
     base_url="https://openrouter.ai/api/v1",
-)
- 
+) 
 # ─── Configuración de personajes ───────────────────────────────────────────────
 PERSONAJES = {
     "lucy": {
