@@ -23,25 +23,25 @@ AVATARES = {
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-context.user_data['avatar'] = "Lancaster" # Avatar por defecto
-await update.message.reply_photo(
-photo=AVATARES["Lancaster"]["foto"],
-caption="Hola! Soy Lancaster 😊 \n\nUsa /avatar para cambiar de personaje.\nAvatares: Lancaster/ Foxx / Candy"
+    context.user_data['avatar'] = "Lancaster" # Avatar por defecto
+    await update.message.reply_photo(
+    photo=AVATARES["Lancaster"]["foto"],
+    caption="Hola! Soy Lancaster 😊 \n\nUsa /avatar para cambiar de personaje.\nAvatares: Lancaster/ Foxx / Candy"
 )
 
 async def avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-texto = update.message.text.split()
-if len(texto) == 1:
-lista = "\n".join(AVATARES.keys())
-await update.message.reply_text(f"Elige un avatar: /avatar Nombre\n\nDisponibles:\n{lista}")
-return
+    texto = update.message.text.split()
+    if len(texto) == 1:
+    lista = "\n".join(AVATARES.keys())
+    await update.message.reply_text(f"Elige un avatar: /avatar Nombre\n\nDisponibles:\n{lista}")
+    return
 
 nombre = texto[1].capitalize()
-if nombre in AVATARES:
-context.user_data['avatar'] = nombre
-await update.message.reply_photo(
-photo=AVATARES[nombre]["foto"],
-caption=f"Ahora soy {nombre} 😎\n¿Qué quieres platicar?"
+    if nombre in AVATARES:
+    context.user_data['avatar'] = nombre
+    await update.message.reply_photo(
+    photo=AVATARES[nombre]["foto"],
+    caption=f"Ahora soy {nombre} 😎\n¿Qué quieres platicar?"
 )
 else:
 await update.message.reply_text("Ese avatar no existe. Usa /avatar para ver la lista.")
