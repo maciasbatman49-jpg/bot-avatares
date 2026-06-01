@@ -5,7 +5,7 @@ from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
     MessageHandler, filters, ContextTypes
 )
-import anthropic
+from openai import OpenAI
  
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -14,8 +14,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
  
-# ─── Cliente Anthropic ─────────────────────────────────────────────────────────
-client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+# ─── Cliente OpenRouter ────────────────────────────────────────────────────────
+client = OpenAI(
+    api_key=os.environ["OPENROUTER_API_KEY"],
+    base_url="https://openrouter.ai/api/v1",
+)
  
 # ─── Configuración de personajes ───────────────────────────────────────────────
 PERSONAJES = {
@@ -205,13 +208,13 @@ async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
  
     try:
-        respuesta = client.messages.create(
-            model="claude-opus-4-5",
+        mensajes_con_system = [{"role": "system", "content": personaje["system"]}] + historial
+        respuesta = client.chat.completions.create(
+            model="meta-llama/llama-3.1-8b-instruct:free",
             max_tokens=300,
-            system=personaje["system"],
-            messages=historial,
+            messages=mensajes_con_system,
         )
-        texto_respuesta = respuesta.content[0].text
+        texto_respuesta = respuesta.choices[0].message.content
  
     except Exception as e:
         logger.error(f"Error al llamar a Claude: {e}")
