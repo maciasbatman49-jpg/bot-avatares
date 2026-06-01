@@ -60,7 +60,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "model": "openai/gpt-oss-20b:free",
+            "model": "google/gemma-3-4b-it:free",
             "messages": [
                 {"role": "system", "content": prompt_avatar},
                 {"role": "user", "content": texto}
