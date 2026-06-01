@@ -60,7 +60,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "model": "google/gemini-flash-1.5",
+            "model": "meta-llama/llama-3.2-3b-instruct:free",
             "messages": [
                 {"role": "system", "content": prompt_avatar},
                 {"role": "user", "content": texto}
