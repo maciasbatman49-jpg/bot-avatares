@@ -41,7 +41,7 @@ async def avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['avatar'] = nombre
         await update.message.reply_photo(
             photo=AVATARES[nombre]["foto"],
-            caption=f"Ahora soy {nombre} 😎\n¿Quieres aprender algo nuevo e interesante hoy?"
+            caption=f"Ahora soy {nombre} 😎\n¿Quieres divertirte un rato y pasarla genial amor?"
         )
     else:
         await update.message.reply_text("Ese avatar no existe. Usa /avatar para ver la lista.")
@@ -54,3 +54,44 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_KEY}",
         "Content-Type": "application/json",
+    }
+modelos = [
+        "openai/gpt-oss-20b:free",
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "gryphe/mythomax-l2-13b:free"
+    ]
+
+    for modelo in modelos:
+        try:
+            data = {
+                "model": modelo,
+                "messages": [
+                    {"role": "system", "content": prompt_avatar},
+                    {"role": "user", "content": texto_usuario}
+                ]
+            }
+            r = requests.post(
+                OPENROUTER_URL,
+                headers=headers,
+                json=data,
+                timeout=20
+            )
+
+            if r.status_code == 200:
+                respuesta = r.json()["choices"][0]["message"]["content"]
+                await update.message.reply_text(respuesta)
+                return
+
+        except Exception as e:
+            print(f"Error con {modelo}: {e}")
+            continue
+
+    await update.message.reply_text("amor me hiciste venir tan deliciso. Dame 1 min para tomar fuerzas")
+
+app = Application.builder().token(TELEGRAM_TOKEN).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("avatar", avatar))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
+
+print("Bot iniciado")
+app.run_polling()
