@@ -31,10 +31,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     texto = update.message.text.split()
-    if len(texto) == 1:
-    lista = "\n".join(AVATARES.keys())
-    await update.message.reply_text(f"Elige un avatar: /avatar Nombre\n\nDisponibles:\n{lista}")
-    return
+if len(texto) == 1:
+lista = "\n".join(AVATARES.keys())
+await update.message.reply_text(f"Elige un avatar: /avatar Nombre\n\nDisponibles:\n{lista}")
+return
 
 nombre = texto[1].capitalize()
     if nombre in AVATARES:
