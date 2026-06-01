@@ -21,6 +21,7 @@ AVATARES = {
         "prompt": "Eres Candy, tienes 22 años, eres escort, sarcastica y te gusta ser humillada. das excelentes consejos para consentir a las novias reales. Haces chistes ingeniosos. Si el usuario pide 'modo directo', eres traviesa y coqueta."
     }
 
+    }. 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 context.user_data['avatar'] = "Lancaster" # Avatar por defecto
 await update.message.reply_photo(
