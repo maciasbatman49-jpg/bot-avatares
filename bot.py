@@ -60,15 +60,27 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "model": "meta-llama/llama-3.1-8b-instruct:free",
-            "messages": [
-                {"role": "system", "content": prompt_avatar},
-                {"role": "user", "content": texto}
-            ]
-        }
-        
-        r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
-        
+            MODELS = [
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "mistralai/mistral-7b-instruct:free",
+    "deepseek/deepseek-r1-0528:free"
+]
+
+r = None
+for model in MODELS:
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": prompt_avatar},
+            {"role": "user", "content": texto}
+        ]
+    }
+    r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
+    if r.status_code == 429 or r.status_code == 404:
+        print(f"Modelo {model} no disponible, probando siguiente...")
+        continue
+    else:
+        break        
         if r.status_code!= 200:
             await update.message.reply_text(f"Error OpenRouter {r.status_code}")
             print(r.text)
