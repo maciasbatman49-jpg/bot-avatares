@@ -47,7 +47,7 @@ await update.message.reply_text("Ese avatar no existe. Usa /avatar para ver la l
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 try:
-avatar_actual = context.user_data.get('avatar', 'Lancaster)
+avatar_actual = context.user_data.get('avatar', "Lancaster")
 prompt_avatar = AVATARES[avatar_actual]["prompt"]
 texto = update.message.text
 
