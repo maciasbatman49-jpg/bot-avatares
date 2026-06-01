@@ -63,7 +63,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "models": [
                 "openai/gpt-oss-20b:free",
                 "meta-llama/llama-3.1-8b-instruct:free",
-                 "gryphe/mythomax-12-13b:free"
+                 "gryphe/mythomax-12-13b:free",
             ]
              "messages": [{"role": "user", "content": texto}]
 
