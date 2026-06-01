@@ -70,6 +70,7 @@ r = None
             {"role": "user", "content": texto}
         ]
     }
+    
     r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
     if r.status_code == 429 or r.status_code == 404:
         print(f"Modelo {model} no disponible, probando siguiente...")
