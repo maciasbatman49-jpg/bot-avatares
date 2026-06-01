@@ -68,7 +68,7 @@ async def set_avatar(update: Update, context: ContextTypes.DEFAULT_TYPE, avatar)
 
 # Comandos de cada avatar
 async def Lancaster(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await set_avatar(update, context, "lancaster")
+    await set_avatar(update, context, "Lancaster")
 
 async def fox(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await set_avatar(update, context, "fox")
