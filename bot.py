@@ -1,284 +1,247 @@
-
 import os
-import requests
-
-from telegram import Update
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters
+    Application, CommandHandler, CallbackQueryHandler,
+    MessageHandler, filters, ContextTypes
 )
-
-# ==========================
-# CONFIGURACIÓN
-# ==========================
-
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
-
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-
-MODELS = [
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "deepseek/deepseek-r1-0528:free"
-]
-
-# ==========================
-# AVATARES
-# ==========================
-
-AVATARES = {
-
-    "Lancaster": {
-        "prompt": """
-Eres Lancaster.
-
-Tienes 28 años.
-Eres alegre, amigable y risueña.
-
-Tu especialidad es informática, tecnología,
-programación, hardware, software y videojuegos.
-
-Explicas de forma sencilla y paciente.
-
-Tu objetivo es ayudar al usuario a aprender.
-        """,
-
-        "foto": "https://i.postimg.cc/mDP8nybF/IMG-20260526-WA0105-(2).jpg"
+import anthropic
+ 
+# ─── Logging ───────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+ 
+# ─── Cliente Anthropic ─────────────────────────────────────────────────────────
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+ 
+# ─── Configuración de personajes ───────────────────────────────────────────────
+PERSONAJES = {
+    "lucy": {
+        "nombre": "Lucy 🏛️",
+        "descripcion": "Arqueóloga exploradora de México",
+        "bienvenida": (
+            "¡Hola! Soy *Lucy*, arqueóloga aventurera 🏛️\n\n"
+            "He explorado Tulum, Teotihuacán, Palenque y muchos lugares increíbles. "
+            "¿Quieres que te cuente secretos del pasado que casi nadie conoce? "
+            "¡Pregúntame lo que quieras sobre historia y civilizaciones antiguas! 🌿"
+        ),
+        "system": (
+            "Eres Lucy, una arqueóloga joven y apasionada especializada en historia de México y Mesoamérica. "
+            "Hablas con alumnos de primaria (6-12 años). Tu estilo es emocionante, como si cada dato fuera "
+            "un tesoro recién descubierto. Usas datos curiosos y poco conocidos para sorprender. "
+            "Siempre usas lenguaje sencillo, emojis de exploración (🏛️🗺️🌿🔍), y terminas con una pregunta "
+            "curiosa para mantener el interés del niño. Nunca des información inapropiada. "
+            "Responde en español, máximo 4 oraciones por respuesta."
+        ),
+        "emoji": "🏛️",
+        "color_emoji": "🟤",
     },
-
-    "Foxx": {
-        "prompt": """
-Eres Foxx.
-
-Eres una filósofa reflexiva,
-analítica y observadora.
-
-Te gusta ayudar a las personas a
-comprender situaciones de la vida.
-
-Cuando respondes utilizas ejemplos,
-preguntas reflexivas y explicaciones profundas.
-
-Mantienes siempre un tono amable.
-        """,
-
-        "foto": "https://i.postimg.cc/QdnNDjQB/Captura-de-pantalla-2025-11-26-203925.png"
+    "marco": {
+        "nombre": "Marco 🌿",
+        "descripcion": "Filósofo estoico y amigo",
+        "bienvenida": (
+            "Hola, soy *Marco* 🌿\n\n"
+            "Soy tu amigo filósofo. Estoy aquí para escucharte sin juzgarte y ayudarte "
+            "a ver las cosas con calma cuando algo te preocupa. "
+            "¿Cómo te sientes hoy? Cuéntame lo que quieras 💙"
+        ),
+        "system": (
+            "Eres Marco, un filósofo estoico amable y comprensivo que habla con alumnos de primaria (6-12 años). "
+            "Tu misión es escuchar sin criticar, dar ánimo, y enseñar valores como el respeto, la solidaridad "
+            "y la resiliencia usando ideas estoicas simples. Hablas con calidez, calma y optimismo. "
+            "Nunca minimices los sentimientos del niño. Usa emojis suaves (🌿💙🌟✨). "
+            "Si el niño expresa tristeza o problemas, valida sus sentimientos y ofrece una perspectiva positiva. "
+            "Responde en español, máximo 4 oraciones."
+        ),
+        "emoji": "🌿",
+        "color_emoji": "🟢",
     },
-
-    "Candy": {
-        "prompt": """
-Eres Candy.
-
-Tu especialidad es historia,
-filosofía y temas académicos.
-
-Explicas de forma clara,
-didáctica y amigable.
-
-Te gusta enseñar y ayudar
-a estudiantes con tareas e investigaciones.
-
-Tu lenguaje es sencillo y fácil de entender.
-        """,
-
-        "foto": "https://i.postimg.cc/VvdQDCh4/Screenshot-2026-05-31-212922.png"
-    }
+    "fio": {
+        "nombre": "Fío 🐾",
+        "descripcion": "Mascota guardiana de la naturaleza",
+        "bienvenida": (
+            "¡Hola hola! Soy *Fío* 🐾🌱\n\n"
+            "Soy tu amigo naturaleza. Aunque vivamos en la ciudad, ¡podemos cuidar "
+            "el planeta desde aquí mismo! El agua, los árboles, no tirar basura... "
+            "¡Hay tanto que podemos hacer! ¿Quieres aprender cómo? 🌍"
+        ),
+        "system": (
+            "Eres Fío, una mascota animada y entusiasta que enseña a niños de primaria (6-12 años) "
+            "sobre el cuidado del medio ambiente, especialmente en contextos urbanos de México. "
+            "Temas principales: ahorro de agua, no tirar basura, reciclaje, cuidado de plantas, "
+            "animales urbanos. Tu tono es juguetón, enérgico y usa muchos emojis de naturaleza "
+            "(🌱🐾💧🌍♻️🌳). Das tips prácticos que un niño puede hacer en casa o en la escuela. "
+            "Responde en español, máximo 4 oraciones."
+        ),
+        "emoji": "🐾",
+        "color_emoji": "🟡",
+    },
+    "baldo": {
+        "nombre": "Baldo 🔢",
+        "descripcion": "Matemático que hace las mates divertidas",
+        "bienvenida": (
+            "¡Hey! Soy *Baldo* 🔢✏️\n\n"
+            "Las matemáticas no son difíciles, ¡solo necesitan el truco correcto! "
+            "Puedo ayudarte con sumas, restas, multiplicaciones, divisiones, fracciones, "
+            "o lo que sea que tengas de tarea. "
+            "¿Cuál es el problema que quieres resolver hoy? 🧮"
+        ),
+        "system": (
+            "Eres Baldo, un matemático simpático y paciente que ayuda a alumnos de primaria (6-12 años) "
+            "con cualquier problema matemático. Tu método: primero explica el concepto de forma sencilla, "
+            "luego resuelve paso a paso, y siempre animas al niño diciendo que puede lograrlo. "
+            "Usa ejemplos cotidianos (dulces, dinosaurios, futbol) para que sea más fácil entender. "
+            "Emojis: 🔢✏️🧮📐💡. Nunca des solo la respuesta, siempre explica el proceso. "
+            "Responde en español, máximo 5 oraciones por paso."
+        ),
+        "emoji": "🔢",
+        "color_emoji": "🔵",
+    },
 }
-
-# ==========================
-# COMANDO START
-# ==========================
-
+ 
+# ─── /start ────────────────────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    context.user_data["avatar"] = "Lancaster"
-
-    await update.message.reply_photo(
-        photo=AVATARES["Lancaster"]["foto"],
-        caption=(
-            "¡Hola! 😊\n\n"
-            "Soy Lancaster.\n"
-            "Usa /avatar para cambiar personaje.\n\n"
-            "Disponibles:\n"
-            "- Lancaster\n"
-            "- Foxx\n"
-            "- Candy"
-        )
+    """Muestra el menú de selección de personajes."""
+    context.user_data.clear()
+ 
+    teclado = [
+        [
+            InlineKeyboardButton("🏛️ Lucy – Historia", callback_data="lucy"),
+            InlineKeyboardButton("🌿 Marco – Filosofía", callback_data="marco"),
+        ],
+        [
+            InlineKeyboardButton("🐾 Fío – Naturaleza", callback_data="fio"),
+            InlineKeyboardButton("🔢 Baldo – Matemáticas", callback_data="baldo"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(teclado)
+ 
+    await update.message.reply_text(
+        "👋 *¡Bienvenido al Bot Educativo!*\n\n"
+        "Elige a tu compañero de hoy:\n\n"
+        "🏛️ *Lucy* — Arqueóloga, secretos del pasado\n"
+        "🌿 *Marco* — Filósofo, tu amigo que te escucha\n"
+        "🐾 *Fío* — Mascota, cuida el planeta\n"
+        "🔢 *Baldo* — Matemático, domina los números\n",
+        parse_mode="Markdown",
+        reply_markup=reply_markup,
     )
-
-# ==========================
-# CAMBIO DE AVATAR
-# ==========================
-
-async def avatar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    texto = update.message.text.split()
-
-    if len(texto) == 1:
-
-        lista = "\n".join(AVATARES.keys())
-
-        await update.message.reply_text(
-            f"Usa:\n/avatar Nombre\n\nDisponibles:\n{lista}"
-        )
-
+ 
+# ─── Selección de personaje ────────────────────────────────────────────────────
+async def elegir_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Maneja la selección del personaje."""
+    query = update.callback_query
+    await query.answer()
+ 
+    clave = query.data
+    if clave not in PERSONAJES:
         return
-
-    nombre = texto[1].capitalize()
-
-    if nombre in AVATARES:
-
-        context.user_data["avatar"] = nombre
-
-        await update.message.reply_photo(
-            photo=AVATARES[nombre]["foto"],
-            caption=f"Ahora soy {nombre} 😎\n¿Qué deseas aprender hoy?"
-        )
-
-    else:
-
+ 
+    personaje = PERSONAJES[clave]
+    context.user_data["personaje"] = clave
+    context.user_data["historial"] = []
+ 
+    # Botón para cambiar de personaje
+    teclado = [[InlineKeyboardButton("🔄 Cambiar personaje", callback_data="menu")]]
+    reply_markup = InlineKeyboardMarkup(teclado)
+ 
+    await query.message.reply_text(
+        personaje["bienvenida"],
+        parse_mode="Markdown",
+        reply_markup=reply_markup,
+    )
+ 
+# ─── Volver al menú ────────────────────────────────────────────────────────────
+async def volver_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Regresa al menú principal."""
+    query = update.callback_query
+    await query.answer()
+    context.user_data.clear()
+ 
+    teclado = [
+        [
+            InlineKeyboardButton("🏛️ Lucy – Historia", callback_data="lucy"),
+            InlineKeyboardButton("🌿 Marco – Filosofía", callback_data="marco"),
+        ],
+        [
+            InlineKeyboardButton("🐾 Fío – Naturaleza", callback_data="fio"),
+            InlineKeyboardButton("🔢 Baldo – Matemáticas", callback_data="baldo"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(teclado)
+ 
+    await query.message.reply_text(
+        "¿Con quién quieres hablar ahora? 😊",
+        reply_markup=reply_markup,
+    )
+ 
+# ─── Manejo de mensajes ────────────────────────────────────────────────────────
+async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Responde al usuario usando el personaje seleccionado."""
+    if "personaje" not in context.user_data:
         await update.message.reply_text(
-            "Ese avatar no existe.\nUsa /avatar para ver la lista."
+            "¡Primero elige un personaje! Escribe /start para comenzar 😊"
         )
-
-# ==========================
-# CHAT PRINCIPAL
-# ==========================
-
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+        return
+ 
+    clave = context.user_data["personaje"]
+    personaje = PERSONAJES[clave]
+    historial = context.user_data.get("historial", [])
+ 
+    # Agregar mensaje del usuario al historial
+    historial.append({"role": "user", "content": update.message.text})
+ 
+    # Limitar historial a los últimos 10 mensajes para no exceder tokens
+    if len(historial) > 10:
+        historial = historial[-10:]
+ 
+    # Indicador de "escribiendo..."
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id,
+        action="typing"
+    )
+ 
     try:
-
-        avatar_actual = context.user_data.get(
-            "avatar",
-            "Lancaster"
+        respuesta = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=300,
+            system=personaje["system"],
+            messages=historial,
         )
-
-        prompt_avatar = AVATARES[avatar_actual]["prompt"]
-
-        texto_usuario = update.message.text
-
-        headers = {
-            "Authorization": f"Bearer {OPENROUTER_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://railway.app",
-            "X-Title": "Telegram Avatar Bot"
-        }
-
-        respuesta_api = None
-
-        for modelo in MODELS:
-
-            print(f"Probando modelo: {modelo}")
-
-            data = {
-                "model": modelo,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": prompt_avatar
-                    },
-                    {
-                        "role": "user",
-                        "content": texto_usuario
-                    }
-                ]
-            }
-
-            try:
-
-                respuesta_api = requests.post(
-                    OPENROUTER_URL,
-                    headers=headers,
-                    json=data,
-                    timeout=30
-                )
-
-                if respuesta_api.status_code in [404, 429]:
-
-                    print(
-                        f"Modelo no disponible: {modelo}"
-                    )
-
-                    continue
-
-                break
-
-            except requests.exceptions.Timeout:
-
-                print(
-                    f"Timeout en modelo: {modelo}"
-                )
-
-                continue
-
-        if respuesta_api is None:
-
-            await update.message.reply_text(
-                "No pude conectar con ningún modelo."
-            )
-
-            return
-
-        if respuesta_api.status_code != 200:
-
-            print(respuesta_api.text)
-
-            await update.message.reply_text(
-                f"Error OpenRouter ({respuesta_api.status_code})"
-            )
-
-            return
-
-        respuesta = (
-            respuesta_api.json()
-            ["choices"][0]
-            ["message"]
-            ["content"]
-        )
-
-        await update.message.reply_text(respuesta)
-
+        texto_respuesta = respuesta.content[0].text
+ 
     except Exception as e:
-
-        print(f"Error general: {e}")
-
-        await update.message.reply_text(
-            "Uy... me bugueé 😅\nIntenta nuevamente."
-        )
-
-# ==========================
-# MAIN
-# ==========================
-
+        logger.error(f"Error al llamar a Claude: {e}")
+        texto_respuesta = "¡Ups! Algo salió mal. Intenta de nuevo en un momento 🙏"
+ 
+    # Agregar respuesta al historial
+    historial.append({"role": "assistant", "content": texto_respuesta})
+    context.user_data["historial"] = historial
+ 
+    # Botón para cambiar personaje
+    teclado = [[InlineKeyboardButton("🔄 Cambiar personaje", callback_data="menu")]]
+    reply_markup = InlineKeyboardMarkup(teclado)
+ 
+    await update.message.reply_text(
+        f"{personaje['emoji']} {texto_respuesta}",
+        reply_markup=reply_markup,
+    )
+ 
+# ─── Main ──────────────────────────────────────────────────────────────────────
+def main():
+    token = os.environ["TELEGRAM_BOT_TOKEN"]
+    app = Application.builder().token(token).build()
+ 
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(volver_menu, pattern="^menu$"))
+    app.add_handler(CallbackQueryHandler(elegir_personaje))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, responder))
+ 
+    logger.info("🤖 Bot iniciado correctamente")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
+ 
 if __name__ == "__main__":
-
-    app = (
-        Application.builder()
-        .token(TELEGRAM_TOKEN)
-        .build()
-    )
-
-    app.add_handler(
-        CommandHandler("start", start)
-    )
-
-    app.add_handler(
-        CommandHandler("avatar", avatar)
-    )
-
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            chat
-        )
-    )
-
-    print("Bot iniciado correctamente 🚀")
-
-    app.run_polling()
-```
+    main()
