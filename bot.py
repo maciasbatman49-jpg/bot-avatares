@@ -62,7 +62,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = {
         
 r = None
-for model in MODELS:
+
     data = {
         "model": model,
         "messages": [
