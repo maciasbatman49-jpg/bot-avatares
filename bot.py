@@ -60,12 +60,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            MODELS = [
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "deepseek/deepseek-r1-0528:free"
-]
-
+        
 r = None
 for model in MODELS:
     data = {
