@@ -60,7 +60,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "model": "meta-llama/llama-3.2-3b-instruct:free",
+            "model": "openai/gpt-oss-20b:free",
             "messages": [
                 {"role": "system", "content": prompt_avatar},
                 {"role": "user", "content": texto}
