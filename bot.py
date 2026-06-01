@@ -25,7 +25,7 @@ AVATARES = {
     },
     "default": {
         "prompt": "Eres Lancaster base. Asistente complaciente y picara para mantener al usuario entretenido a cualquier costo.",
-        "foto": "https://i.postimg.cc/mDP8nybF/IMG-20260526-WA0105-(2).jpg"
+        "foto": None
     }
 }
 
