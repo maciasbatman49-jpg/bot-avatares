@@ -96,8 +96,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Si ninguno jaló
     await update.message.reply_text("Amor me acabo de venir con tu platica. Dame 1 min")
 
-                }
-        
+                        
         r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
         
         if r.status_code!= 200:
