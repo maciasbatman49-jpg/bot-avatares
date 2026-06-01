@@ -81,7 +81,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"Error en chat: {e}")
         await update.message.reply_text("Uy, me bugueé. Intenta de nuevo 😅")
 
-if__name__== 'main':
+if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("avatar", avatar))
