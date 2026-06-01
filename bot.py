@@ -55,7 +55,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Authorization": f"Bearer {OPENROUTER_KEY}",
         "Content-Type": "application/json",
     }
-modelos = [
+models = [
         "openai/gpt-oss-20b:free",
         "meta-llama/llama-3.1-8b-instruct:free",
         "gryphe/mythomax-l2-13b:free"
