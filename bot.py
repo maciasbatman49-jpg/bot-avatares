@@ -69,23 +69,28 @@ MODELS = [
 
 r = None
 
-try:
-    for model in MODELS:
-        data = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": prompt_avatar},
-                {"role": "user", "content": texto}
-            ]
-        }
-        r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
+for model in MODELS:
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": prompt_avatar},
+            {"role": "user", "content": texto}
+        ]
+    }
+    r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
 
-        if r.status_code == 429 or r.status_code == 404:
-            print(f"Modelo {model} no disponible, probando siguiente...")
-            continue
-        else:
-            # Si la respuesta es válida, salimos del ciclo
-            break
+    if r.status_code == 429 or r.status_code == 404:
+        print(f"Modelo {model} no disponible, probando siguiente...")
+        continue
+    else:
+        # Si la respuesta es válida, salimos del ciclo
+        break
+
+# Al final puedes verificar si r quedó vacío
+if r is None:
+    print("No se obtuvo respuesta de ningún modelo.")
+else:
+    print("Respuesta obtenida correctamente.")
 
 except requests.exceptions.Timeout:
     print("La solicitud excedió el tiempo de espera.")
