@@ -60,12 +60,14 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "model": "google/gemini_flash-1.5",
-            "messages": [
-                {"role": "system", "content": prompt_avatar},
-                {"role": "user", "content": texto}
+            "models": [
+                "openai/gpt-oss-20b:free",
+                "meta-llama/llama-3.1-8b-instruct:free",
+                gryphe/mythomax-12-13b:free
             ]
-        }
+             "messages": [{"role": "user", "content": texto}]
+
+                }
         
         r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
         
