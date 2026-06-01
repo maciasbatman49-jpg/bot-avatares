@@ -62,7 +62,8 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = {
             async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
     texto = update.message.text
-    
+
+    }
     headers = {
         "Authorization": f"Bearer {OPENROUTER_KEY}",
         "Content-Type": "application/json"
