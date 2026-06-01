@@ -52,6 +52,6 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 app = Application.builder().token(TELEGRAM_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler(["Sweedy Foxx", "Lancaster", "Candy"], set_avatar))
+app.add_handler(CommandHandler(["Foxx", "Lancaster", "Candy"], set_avatar))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 app.run_polling()
