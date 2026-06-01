@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # Handlers de comandos
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("lancaster", lancaster))
+    app.add_handler(CommandHandler("Lancaster", Lancaster))
     app.add_handler(CommandHandler("fox", fox))
     app.add_handler(CommandHandler("candy", candy))
     app.add_handler(CommandHandler("default", default))
