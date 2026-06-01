@@ -59,6 +59,8 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "X-Title": "Telegram Bot"
         }
         
+import requests
+
 MODELS = [
     "meta-llama/llama-3.1-8b-instruct:free",
     "mistralai/mistral-7b-instruct:free",
@@ -66,20 +68,35 @@ MODELS = [
 ]
 
 r = None
-for model in MODELS:
-    data = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": prompt_avatar},
-            {"role": "user", "content": texto}
-        ]
-    }
-    r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
-    if r.status_code == 429 or r.status_code == 404:
-        print(f"Modelo {model} no disponible, probando siguiente...")
-        continue
-    else:
-        break
+
+try:
+    for model in MODELS:
+        data = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": prompt_avatar},
+                {"role": "user", "content": texto}
+            ]
+        }
+        r = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
+
+        if r.status_code == 429 or r.status_code == 404:
+            print(f"Modelo {model} no disponible, probando siguiente...")
+            continue
+        else:
+            # Si la respuesta es válida, salimos del ciclo
+            break
+
+except requests.exceptions.Timeout:
+    print("La solicitud excedió el tiempo de espera.")
+except requests.exceptions.RequestException as e:
+    print(f"Error en la conexión: {e}")
+except Exception as e:
+    print(f"Ocurrió un error inesperado: {e}")
+finally:
+    if r is None:
+        print("No se obtuvo respuesta de ningún modelo.")
+
         
         if r.status_code!= 200:
             await update.message.reply_text(f"Error OpenRouter {r.status_code}")
