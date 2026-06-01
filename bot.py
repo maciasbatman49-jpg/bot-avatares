@@ -60,12 +60,40 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         data = {
-            "models": [
-                "openai/gpt-oss-20b:free",
-                "meta-llama/llama-3.1-8b-instruct:free",
-                 "gryphe/mythomax-12-13b:free"
-            ],
-             "messages": [{"role": "user", "content": texto}]
+            async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    texto = update.message.text
+    
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    # Lista de modelos por si uno se cae
+    modelos = [
+        "openai/gpt-oss-20b:free",
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "gryphe/mythomax-l2-13b:free"
+    ]
+    
+    for modelo in modelos:
+        try:
+            data = {
+                "model": modelo, # Singular, sin S
+                "messages": [{"role": "user", "content": texto}]
+            }
+            r = requests.post("https://openrouter.ai/api/v1/chat/completions", 
+                            headers=headers, json=data, timeout=20)
+            
+            if r.status_code == 200:
+                respuesta = r.json()["choices"][0]["message"]["content"]
+                await update.message.reply_text(respuesta)
+                return # Ya jaló, salte
+                
+        except:
+            continue # Si falla, intenta el siguiente
+    
+    # Si ninguno jaló
+    await update.message.reply_text("Amor me acabo de venir con tu platica. Dame 1 min")
 
                 }
         
