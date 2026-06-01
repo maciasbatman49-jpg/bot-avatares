@@ -46,7 +46,7 @@ Cambia de avatar cuando quieras. Mándame /help si te pierdes."""
 
 # Comando /help
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Usa /start para ver los avatares. O escríbeme directo y te contesto como Lancaster default."
+    await update.message.reply_text("Usa /start para ver los avatares wey. O escríbeme directo y te contesto como Lancaster default.")
 
 # Función para cambiar avatar y mandar foto
 async def set_avatar(update: Update, context: ContextTypes.DEFAULT_TYPE, avatar):
